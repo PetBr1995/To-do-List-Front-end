@@ -1,12 +1,25 @@
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    Snackbar,
+    TextField,
+    Typography,
+    useMediaQuery,
+    useTheme
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from 'axios';
 
 const CreateTask = () => {
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery('(max-width:500px)');
 
+    const [successMessage, setSuccessMessage] = useState('');
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -21,16 +34,17 @@ const CreateTask = () => {
         }));
     };
 
-    // Agora executa no submit do formulário
     const handleSubmit = async (e) => {
-        e.preventDefault(); // impede recarregamento da página
+        e.preventDefault();
 
         try {
             await axios.post('http://localhost:3001/api/todos/create', {
                 ...formData,
                 status: 'pendente',
             });
-            navigate('/tarefas');
+            setSuccessMessage(`Tarefa "${formData.title}" criada com sucesso!`);
+            setOpenSnackbar(true);
+            setTimeout(() => navigate('/tarefas'), 2000);
         } catch (error) {
             console.error('Erro ao criar tarefa:', error);
         }
@@ -38,31 +52,40 @@ const CreateTask = () => {
 
     return (
         <>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            {/* Botões responsivos */}
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: isMobile ? "center" : "space-between",
+                    flexDirection: isMobile ? "column" : "row",
+                    gap: 2,
+                    mb: 3,
+                }}
+            >
                 <Button
                     variant="contained"
-                    sx={{ marginBottom: "1rem", fontWeight: 600 }}
                     startIcon={<ArrowBack />}
                     onClick={() => navigate('/tarefas')}
+                    sx={{ fontWeight: 600 }}
                 >
                     Retornar a Tarefas
                 </Button>
                 <Button
                     variant="contained"
-                    sx={{ marginBottom: "1rem", fontWeight: 600 }}
                     endIcon={<ArrowForward />}
                     onClick={() => navigate('/')}
+                    sx={{ fontWeight: 600 }}
                 >
-                    Retornar a Tarefas
+                    Retornar à Home
                 </Button>
             </Box>
 
+            {/* Formulário */}
             <Box sx={{ maxWidth: 500, margin: "auto" }}>
                 <Typography variant="h5" textAlign="center" mb={4}>
                     Criar Tarefa
                 </Typography>
 
-                {/* ✅ Formulário começa aqui */}
                 <form onSubmit={handleSubmit}>
                     <Box
                         sx={{
@@ -98,13 +121,29 @@ const CreateTask = () => {
                             required
                         />
 
-                        {/* ✅ Tipo submit = ativa validação HTML */}
                         <Button variant="contained" type="submit">
                             Salvar Tarefa
                         </Button>
                     </Box>
                 </form>
             </Box>
+
+            {/* Snackbar de sucesso */}
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={4000}
+                onClose={() => setOpenSnackbar(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+                <Alert
+                    onClose={() => setOpenSnackbar(false)}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                >
+                    {successMessage}
+                </Alert>
+            </Snackbar>
         </>
     );
 };

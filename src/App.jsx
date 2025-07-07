@@ -4,6 +4,7 @@ import Layout from './pages/Layout/Layout';
 import Home from './pages/Home/Home';
 import TaskList from './pages/Tasks/Tasks';
 import CreateTask from './components/CreateTask/CreateTask';
+import EditarTarefa from './components/EditTask/EditTask';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="tarefas" element={<TaskList />} />
           {/* se quiser outras páginas, adicione aqui */}
           <Route path='/criartarefa' element={<CreateTask/>}/>
+          <Route path="/editartarefa/:id" element={<EditarTarefa />} />
         </Route>
       </Routes>
     </BrowserRouter>
